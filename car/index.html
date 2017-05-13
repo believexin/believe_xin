@@ -1,0 +1,216 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=320,minimum=0.5,maximum=2.0,user-scalable=no"/>
+	<title>赛车</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Document</title>
+</head>
+<body>
+	<audio autoplay="true" src="../music/刚好遇见你.mp3" playcount="10"></audio>
+	<!-- 定时器显示开始 -->
+	<div id="timer"></div>
+	<!-- 定时器显示结束 -->
+	<!-- 赛道开始 -->
+	<div id="main">
+		<div id="moddle1"></div>
+		<div id="moddle2"></div>
+		<div id="moddle3"></div>
+		<div id="moddle4"></div>
+		<img id="play" src = "车1.png" style="top:80%;">
+	</div>
+	<!-- 赛道结束 -->
+
+	<!-- 左右按钮开始 -->
+		<div id="btn_left"></div>
+		<div id="btn_right"></div>
+	<!-- 左右按钮结束 -->
+	<!-- 模态层开始 -->
+	<div id="laverWrap">
+		<div id="laver">
+			<h3 id="txt">game over!!!</h3>
+			<input type="button" value="退出" id="endBtn">
+			<input type="button" value="再来一次" id="restartBtn" autofocus="autofocus">
+		</div>
+	</div>
+	<!-- 模态层结束 -->
+	<script type="text/javascript">
+		window.onload = function(){
+			// 获取id对象
+			function $(_id) {
+				return document.getElementById(_id);
+			}
+			// 获取小车对象
+			var play = $('play');
+			var laverWrap = $("laverWrap");
+			// 初始化left，和top值变量
+			var  left = 5;
+			var  top  = 80;
+			// timeout定时器停止标志
+			var flag = false;
+			
+			// 再来一次按钮的事件回调函数
+			$('restartBtn').onclick = function (){
+				window.location.reload();
+			}
+			$("endBtn").onclick = function (){
+				window.location.href = "/";
+			}
+			// 手机端按钮回调函数
+			function touchStart(e) {
+				e = e || window.event;
+				var currObj = e.target || e.srcElement;
+				// 左移
+				if(currObj.id == 'btn_left'){
+					if(left != 5)
+					left -= 25;
+					play.style.left = left + "%";
+				}
+				// 右移
+				if(currObj.id == 'btn_right'){
+					if(left < 80)
+					left += 25;
+					play.style.left =  left + "%";
+				}
+
+				var mRect = play.getBoundingClientRect();
+				var mLeft = mRect.left;
+				var mTop = mRect.top;
+
+			}
+			// 手机端按钮注册事件
+			document.addEventListener("touchstart",touchStart);
+			
+			// pc端键盘回调函数
+			function fangxingkey(e) {
+				e = e || window.event;
+				// 键盘左移
+				if(e.keyCode == 37){
+					if(left != 5)
+					left -= 25;
+					play.style.left = left + "%";
+				}
+				// 键盘右移
+				if(e.keyCode == 39){
+					if(left < 80)
+					left += 25;
+					play.style.left =  left + "%";
+				}
+				// 键盘上移
+				if(e.keyCode == 38){
+					if( top >= 10)
+					top -= 10;
+					play.style.top =  top + "%";
+				}
+				// 键盘下移
+				if(e.keyCode == 40){
+					if( top <= 80)
+					top +=10;
+					play.style.top =  top + "%";
+				}
+				var mRect = play.getBoundingClientRect();
+				var mLeft = mRect.left;
+				var mTop = mRect.top;
+			}
+			document.addEventListener("keydown",fangxingkey);
+			// 空格键暂停事件
+			function pauseKey(e){
+				if(e.keyCode == 32){
+					alert("暂停！！");
+				}
+			}
+			document.addEventListener("keyup",pauseKey);
+			// 创建障碍小车函数
+			function createDiv(_id,moddle){
+				var randNum0 = Math.floor(3 * Math.random());
+				var div = document.createElement('img');
+				div.className = 'm' + _id;
+				div.style.width = '60%';
+				div.src = randNum0 + '.png';
+				div.style.position = "absolute";
+				div.style.left = '20%';
+				div.style.top = "-20%";
+				moddle.appendChild(div);
+				return div;
+			}
+
+			// 动态产生障碍物小车
+			function moveModdle (){
+				// 定义一个数组将四个赛道存入数组
+				var moddle = [moddle1,moddle2,moddle3,moddle4];
+				var r = Math.floor(4 * Math.random());
+				// 调用
+				var div = createDiv(r,moddle[r]);
+				// 获得障碍物小车对象
+				var m = document.getElementsByClassName("m" + r);
+				// 障碍物小车移动函数
+				function mo (){
+					var mar = parseInt(m[0].style.top);
+					// 获得障碍物距离视口的距离
+					var mRect = m[0].getBoundingClientRect();
+					var mLeft = parseInt(mRect.left);
+					var mTop = parseInt(mRect.top);
+					var mBottom = parseInt(mRect.bottom);
+					mar ++;
+					m[0].style.top = mar +"%";
+					// 调用判断函数
+					result(mTop,mLeft,mBottom);
+					if(mar >= 120){
+						m[0].remove();
+						clearInterval(timerId2);
+					}
+				}
+				var timerId2;
+				function timeout(){
+					if(flag)
+						return;
+					timerId2 = setTimeout(timeout,20);
+					mo();
+				}
+				timeout();
+			}
+			// 每个500毫秒产生一个小车随机分配到一个赛道
+			var timerId = setInterval(moveModdle,700);
+
+			function result(mTop,mLeft,mBottom){				
+				var playRect = play.getBoundingClientRect();
+				var playLeft = parseInt(playRect.left);
+				var playTop  = parseInt(playRect.top);
+				var playBottom  = parseInt(playRect.bottom);
+				var y =playTop - mTop;
+				if(playLeft == mLeft && (playTop - mTop) <  (mBottom - mTop) && (playTop - mTop) > -(playBottom - playTop)){
+					flag = true;
+					document.removeEventListener('keydown',fangxingkey);
+					document.removeEventListener("keyup",pauseKey);
+					clearInterval(timerId3);
+					clearInterval(timerId);
+					laverWrap.style.display = "block";
+
+				}
+			}
+
+			// 倒计时
+			var t = 90;
+			function timer(){
+
+				var mi = parseInt(t/60);
+				var s = t % 60;
+				var str = mi + ":" + s;
+				var timers = $('timer');
+				timers.innerHTML = str;
+				t --;
+				if(t < 0){
+					laverWrap.style.display = "block";
+					$('txt').innerHTML = '恭喜你，挑战成功!!!';
+					flag = true;
+					clearInterval(timerId3);
+					clearInterval(timerId);
+				}
+			}
+			// 倒计时函数启动
+			var timerId3 = setInterval(timer,1000);
+		}
+	</script>
+</body>
+</html>

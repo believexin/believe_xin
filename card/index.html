@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=450,minimum-scale=0.2,maximum-scale=2.0,user-scalable=0">
+	<title>Translate Card游戏</title>
+	<link rel="shortcat icon" href="images/1.ico">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+			color: #C4A44D;
+			border:#FF8B00;
+			-webkit-tap-highlight-color: rgba(0,0,0,0);
+		}
+		body{
+			background: #DFDFDF;
+		}	
+		h1{
+			width: 400px;
+			margin: 10px auto 0;
+			color: #C4A44D;
+			text-align: center;
+		}	
+		table{
+			border-collapse: collapse;
+			font-size: 0;
+			border:0;
+			-webkit-user-select:none;
+		}
+		td{
+			border:0;
+			padding: 0;
+			width: 40px;
+			height: 40px;
+		}
+		img{
+			display: block;
+		}
+		#container{
+			width:320px;
+			height: 320px;
+			margin: 20px auto;
+			position: relative;
+			/*border:2px solid #D6FFC2;*/
+			padding: 10px;
+			background: #ccc;
+			-webkit-user-select:none;
+			-moz-user-select:none;
+			-ms-user-select:none;
+		}
+		#container:hover{
+			cursor: url(images/2.cur),pointer;
+		}
+		#warp{
+			-webkit-user-select:none;
+			width: 400px;
+			height: 50px;
+			margin: 0 auto;
+			font-size: 14px;
+		}
+		span{
+			margin: 0 0 0 40px;
+			color: #C4A44D;
+		}
+		select{
+			background:#DFDFDF;
+			color: #C4A44D;
+			/*border: #FF8B00!important;*/
+			outline: #C4A44D auto 5px;
+		}
+		#playgame{
+			width: 120px;
+			height: 35px;
+			background: #E7D6BA;
+			text-align: center;
+			font-size: 18px;
+			font-weight: bold;
+			line-height: 35px;
+			margin: 10px auto;
+			border-radius: 5px;
+			cursor: pointer;
+			-webkit-user-select:none;
+		}
+		#playgame:active{
+			position: relative;
+			left: 1px;
+			top: 2px;
+		}
+		#TableWarp{
+			border:0;
+			font-size: 0;
+			position: absolute;
+			top:10px;	
+		}
+		#timer{
+			width: 250px;
+			position: absolute;
+			top:0;
+			left: calc(50% + 200px);
+		}
+		#timer #timers{
+			width: 250px;
+			position: absolute;
+			top:63px;
+			font-size: 60px;
+			left:70px;
+		}
+		#timer img{
+			width: 250px;
+		}
+		@media only screen and (min-width: 0px) and (max-width: 450px){
+			#timer{
+				width: 0;
+				position: static;
+				width: 100%;
+				margin-top: 50px;
+			}
+			#timer #timers{
+				width: 100%;
+				position: static;
+				font-size: 20px;
+				text-align: center;
+			}
+			#timer img{
+				display: none;
+			}
+		}
+	</style>
+	
+</head>
+<body>
+	<!-- 标题开始 -->
+	<h1>Translate Card</h1>
+	<!-- 标题结束 -->
+	<!-- 创建游戏区域开始 -->
+	<div id="container">
+		<div id="start"><img src="images/start.jpg" alt=""></div>
+		<table id="Table"></table>
+		<table id="TableWarp"></table>
+	</div>
+	<!-- 创建游戏区域结束 -->
+	<!-- 功能区开始 -->
+	<div id="warp">
+		<span>请选择难度：</span>
+		<select name="" id="selects">
+			<option value="0">请选择大小</option>
+			<option value="1">4 * 4</option>
+			<option value="2">4 * 6</option>
+			<option value="3">6 * 6</option>
+			<option value="4">6 * 8</option>
+			<option value="5">8 * 8</option>
+			<option value="6">8 * 10</option>
+			<option value="7">10 * 10</option>
+		</select>
+		<select name="" id="selects2" disabled>
+			<option value="0">请选择图片种类</option>
+		</select>
+		<br>
+		<div id="playgame">开始游戏</div>
+	</div>
+	<div id="timer">
+		<div id="timers"></div>
+		<img src="images/提示板.png" alt="">
+
+	</div>
+<!-- 功能区结束 -->
+	<script type="text/javascript">
+		window.onload = function (){
+			// 获取container对象
+			var container = document.getElementById('container');
+			// 获取初始图片
+			var start = document.getElementById('start');
+
+			// 获取存放游戏图片（img1~img18）的表格对象
+			var Table = document.getElementById('Table');
+			// 获取存放游戏图片（img0）的表格对象
+			var TableWarp = document.getElementById('TableWarp');
+			
+			// 开始游戏按钮
+			var playgame = document.getElementById('playgame');
+
+			// 获取img0图片的标签
+			var imgs0 = TableWarp.getElementsByTagName('img');
+			// 获取img1~img18图片的标签
+			var imgs = Table.getElementsByTagName('img');
+
+			// 获取游戏难度列表框
+			var selects = document.getElementById('selects');
+			var selects2 = document.getElementById('selects2')
+			var timerId3 = null;
+			// 定义设置图片多少的变量
+			var numbers = 0;
+
+			// 定义表格的宽、高
+			var w = 0;
+			var h = 0;
+
+			// 设置大小的列表框的回调函数
+			selects.onchange = function (){
+				switch(parseInt(selects.value)){
+					case 0:
+						w = 0;
+						h = 0;
+						break;
+					case 1:
+						w = 4;
+						h = 4;
+						break;
+					case 2:
+						w = 4;
+						h = 6;
+						break;
+					case 3:
+						w = 6;
+						h = 6;
+						break;
+					case 4:
+						w = 6;
+						h = 8;
+						break;
+					case 5:
+						w = 8;
+						h = 8;
+						break;
+					case 6:
+						w = 8;
+						h = 10;
+						break;
+					case 7:
+						w = 10;
+						h = 10;
+						break;
+				}
+
+				// 将选择种类的列表清空
+				selects2.options.length = 1;
+				selects2.disabled = false;
+
+				// 动态给列表框赋值
+				for(var i =6;i <= (w * h) / 2;i += 6){
+					if(i <= 8){
+						var opt = new Option('简单',6);
+						selects2.add(opt);
+					}else if(i <= 12 && i > 8){
+						var opt = new Option('一般',12);
+						selects2.add(opt);
+					}else if(i <= 18 && i > 12){
+						var opt = new Option('困难',18);
+						selects2.add(opt);
+
+					}else{
+						break;
+					}
+
+				}
+				
+			}
+			
+			// 开始游戏的回调函数
+			playgame.onclick = function (){
+				clearInterval(timerId3);
+				//设置图片多少的列表框
+				numbers = selects2.value;
+				// 判断玩家是否选择难度
+				if(w == 0 || numbers == 0){
+					alert('请选择难度！！');
+					return;
+				}
+				var t = w * h * 2;
+				timerId3 = setInterval(timer,1000);
+				// 倒计时
+				function timer(){
+				var mi = parseInt(t/60);
+				var s = t % 60;
+				var str = mi + ":" + s;
+				var timers = document.getElementById('timers');
+				timers.innerHTML = str;
+				t --;
+				if(t < 0){
+					clearInterval(timerId3);
+					alert('时间到！!');
+					window.location.reload();
+				}
+			}
+				// 初始化数据
+				start.style.display = 'none';
+				// 将存放图片的表格清空
+				Table.innerHTML= "";
+				TableWarp.innerHTML= "";
+
+				// 初始化表格的父容器的宽度
+				container.style.width = 40 * w + 'px';
+				container.style.height = 40 * h + 'px';
+
+				// 动态创建表格、插入图片
+				for(var i = 0;i < h;i ++){
+
+					// 定义插入img1~18图片的行
+					var tableTr = Table.insertRow();
+
+					// 定义插入img0图片的行
+					var tableTr0 = TableWarp.insertRow();
+									
+					// 循环遍历单元格
+					for(var j = 0;j < w;j ++){
+						// 定义插入img1~18图片的单元格
+						var tableTd = tableTr.insertCell();
+
+						// 定义插入img0图片的单元格
+						var tableTd0 = tableTr0.insertCell();
+						
+						// 定义img1~18图片的标签
+						var images = document.createElement('img');
+						// 定义img0图片的标签
+						var images0 = document.createElement('img');
+						// 定一个产生随机图片的随机数
+						var randNum = Math.floor(numbers * Math.random() + 1);
+
+						//为img1~18图片的标签设置src属性
+						images.src = 'images/img'+ randNum +'.gif';
+						
+						//为img0图片的标签设置一系列属性
+						images0.src = 'images/img0.gif';
+						images0.style.display = 'block';
+						// index1为对应图片的名称例如：图片为img1.gif,index1 = 1;
+						images0.setAttribute('index1',randNum);
+						// index2为对应图片的下标例如：图片位于第一行第二列,index2 = 12;
+						images0.setAttribute('index2',i + "" + j);
+						
+						tableTd.appendChild(images);
+						tableTd0.appendChild(images0);
+					}
+				}
+
+				/*
+					判断和修改不成对图片
+
+					遍历所有图片名为img1.gif的图片并将下标存入数组
+					如果不成对将图片名为img1.gif的最后一张图片改为img2.gif
+					。。。
+					依次循环17次结束
+				*/
+				for(var i = 0;i < numbers - 1;i ++){
+					var num = new Array();
+					
+					// k为数组下标
+					for(var j = 0,k = 0;j < imgs0.length;j ++){
+										
+						if(imgs0[j].getAttribute('index1') == i + 1){
+							
+							num[k] = j;
+							// ins为存放每一种图片的最后一张的下标
+							var ins = j;
+							k++;
+						}
+
+					}
+						//
+					if(num.length % 2 != 0){
+						imgs0[ins].setAttribute('index1',i + 2);
+						imgs[ins].src = 'images/img'+ (i+2) +'.gif';
+					}
+				}
+
+				// flag1为记录上一次点的事件源的自定义属性index1
+				var flag1 = -1;
+
+				// flag2为记录上一次点的事件源的自定义属性index2
+				var flag2 = -1;
+				// 为判断是第一次点击还是第二次点击
+				var times = 1;
+
+				// 记录上一次点击事件源对对象
+				var flag3 = -1;
+				function touchStart(e){
+					e = e || window.event;
+					var currObj = e.target || e.srcElement;
+
+					if(currObj.tagName == 'IMG'){
+						// 获取当前事件源的自定义属性
+						var imagesSrc = currObj.getAttribute("index1");
+						var imagesIndex = currObj.getAttribute("index2");
+
+						// 每点击一次将上面的img0.gif隐藏
+						currObj.style.display = 'none';
+
+						// 判断是第一次点击还是第二次点击
+						if(times % 2 != 0){
+
+							// 如果是第一次点击，记录点击对象的属性
+							flag1 = imagesSrc;
+							flag2 = imagesIndex;
+							setTimeout(function(){
+								flag3 = currObj;
+							},300);
+
+							times++;
+
+							// 如果点击次数等于10则重新复制以免数值过大
+							if(times == 10){
+								times = 2;
+							}
+						}else{
+							// 第二次点击
+							currObj.style.display = 'none';
+							// 如果两次电的图片是否相同
+							if(imagesSrc == flag1){
+
+								// 设置标志判断是否通关
+								var result = true;
+								for(var i = 0;i < imgs0.length;i ++){
+									if(imgs0[i].style.display == 'block'){
+										result = false;
+									}
+								}
+								if(result){
+									alert('通关成功！！');
+									// 停止定时器
+									clearInterval(timerId3);
+								}
+
+							}else{
+								// 如果两次点击不是同一张图片设置定时器隐藏下面图片
+								setTimeout(function(){
+									currObj.style.display = 'block';
+									flag3.style.display = 'block';
+								},300);
+							}
+							// 为了上一条语句，延迟给flag3赋值
+							setTimeout(function(){
+								flag3 = -1;	
+							},300);
+
+							flag2 = -1;
+							flag1 = -1;
+							times++;
+						}
+					}
+				}
+
+				TableWarp.addEventListener("click",touchStart);				
+			}
+			
+			
+			
+
+		}
+	</script>
+</body>
+</html>
