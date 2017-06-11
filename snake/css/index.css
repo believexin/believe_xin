@@ -1,0 +1,36 @@
+@charset "utf-8";
+/*全局设置*/
+*{
+	margin: 0;
+	padding: 0;
+}
+#wrap{
+	width: 500px;
+	height: 500px;
+	background: #c9c9c9;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
+	border: 5px solid green;
+}
+
+#wrap .snake{
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background: #0cc;
+	border-radius: 50%;
+}
+#wrap .fruit{
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background: #FF6601;
+}
+#wrap #snakeHeader{
+	background: red;
+	z-index: 100;
+}
